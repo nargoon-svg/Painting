@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Painting Calculator - محاسبه‌گر نقاشی</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: Tahoma, Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 10px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .card { background: white; border-radius: 15px; padding: 20px; margin-bottom: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        h1 { color: #2c5282; font-size: 24px; margin-bottom: 5px; }
+        h2 { color: #2d3748; font-size: 18px; margin-bottom: 15px; border-bottom: 2px solid #4299e1; padding-bottom: 8px; }
+        .header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .btn { padding: 12px 20px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
+        .btn-settings { background: #f7fafc; padding: 10px; border-radius: 8px; border: none; cursor: pointer; }
+        input, select { width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 16px; font-family: Tahoma, Arial; }
+        input:focus, select:focus { outline: none; border-color: #4299e1; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; overflow-x: auto; display: block; }
+        th, td { padding: 12px 8px; text-align: center; border: 1px solid #e2e8f0; }
+        th { background: #4299e1; color: white; font-weight: bold; }
+        tr:nth-child(even) { background: #f7fafc; }
+        .grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        .grid-2 { grid-template-columns: repeat(2, 1fr); }
+        .setting-box { background: #edf2f7; padding: 15px; border-radius: 8px; }
+        .result-box { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); padding: 15px; border-radius: 8px; margin: 10px 0; }
+        .result-big { font-size: 28px; font-weight: bold; color: #2d3748; margin: 10px 0; }
+        .hidden { display: none; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #4a5568; font-size: 14px; }
+        @media (min-width: 768px) {
+            body { padding: 20px; }
+            .card { padding: 30px; }
+            h1 { font-size: 32px; }
+            .grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="card">
+            <div class="header-flex">
+                <div>
+                    <h1>🏠 Painting Calculator</h1>
+                    <p style="color: #718096;">محاسبه‌گر نقاشی ساختمان</p>
+                </div>
+                <button class="btn-settings" onclick="toggleSettings()">⚙️</button>
+            </div>
+        </div>
+
+        <!-- Settings -->
+        <div id="settingsPanel" class="card hidden">
+            <h2>⚙️ Settings - تنظیمات</h2>
+            
+            <h3 style="margin: 15px 0 10px; color: #4a5568;">Work Rate - نرخ کار (m²/h)</h3>
+            <div class="grid grid-2">
+                <div class="setting-box">
+                    <label>Simple Paint (رنگ ساده)</label>
+                    <input type="number" id="rate_simple" value="12" step="0.5">
+                </div>
+                <div class="setting-box">
+                    <label>Plastic Paint (پلاستیک)</label>
+                    <input type="number" id="rate_plastic" value="10" step="0.5">
+                </div>
+                <div class="setting-box">
+                    <label>Oil Paint (روغنی)</label>
+                    <input type="number" id="rate_oil" value="8" step="0.5">
+                </div>
+                <div class="setting-box">
+                    <label>Acrylic Paint (اکریلیک)</label>
+                    <input type="number" id="rate_acrylic" value="9" step="0.5">
+                </div>
+            </div>
+
+            <h3 style="margin: 15px 0 10px; color: #4a5568;">Condition Multiplier - ضریب وضعیت</h3>
+            <div class="grid grid-2">
+                <div class="setting-box">
+                    <label>Excellent (عالی)</label>
+                    <input type="number" id="cond_excellent" value="1.0" step="0.1">
+                </div>
+                <div class="setting-box">
+                    <label>Good (خوب)</label>
+                    <input type="number" id="cond_good" value="1.3" step="0.1">
+                </div>
+                <div class="setting-box">
+                    <label>Fair (متوسط)</label>
+                    <input type="number" id="cond_fair" value="1.6" step="0.1">
+                </div>
+                <div class="setting-box">
+                    <label>Poor (ضعیف)</label>
+                    <input type="number" id="cond_poor" value="2.0" step="0.1">
+                </div>
+                <div class="setting-box">
+                    <label>Very Poor (خیلی ضعیف)</label>
+                    <input type="number" id="cond_verypoor" value="2.5" step="0.1">
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Form -->
+        <div class="card">
+            <h2>📝 Project Information - اطلاعات پروژه</h2>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Section - بخش</th>
+                        <th>Area/Count<br>متراژ/تعداد</th>
+                        <th>Condition<br>وضعیت</th>
+                        <th>Paint Type<br>نوع رنگ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Wall (دیوار)</strong></td>
+                        <td><input type="number" id="wall_area" placeholder="m²"></td>
+                        <td>
+                            <select id="wall_condition">
+                                <option value="excellent">Excellent (عالی)</option>
+                                <option value="good" selected>Good (خوب)</option>
+                                <option value="fair">Fair (متوسط)</option>
+                                <option value="poor">Poor (ضعیف)</option>
+                                <option value="verypoor">Very Poor (خیلی ضعیف)</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select id="wall_paint">
+                                <option value="simple">Simple (ساده)</option>
+                                <option value="plastic" selected>Plastic (پلاستیک)</option>
+                                <option value="oil">Oil (روغنی)</option>
+                                <option value="acrylic">Acrylic (اکریلیک)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ceiling (سقف)</strong></td>
+                        <td><input type="number" id="ceiling_area" placeholder="m²"></td>
+                        <td>
+                            <select id="ceiling_condition">
+                                <option value="excellent">Excellent (عالی)</option>
+                                <option value="good" selected>Good (خوب)</option>
+                                <option value="fair">Fair (متوسط)</option>
+                                <option value="poor">Poor (ضعیف)</option>
+                                <option value="verypoor">Very Poor (خیلی ضعیف)</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select id="ceiling_paint">
+                                <option value="simple">Simple (ساده)</option>
+                                <option value="plastic" selected>Plastic (پلاستیک)</option>
+                                <option value="oil">Oil (روغنی)</option>
+                                <option value="acrylic">Acrylic (اکریلیک)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Door (در)</strong></td>
+                        <td><input type="number" id="door_count" placeholder="count"></td>
+                        <td>
+                            <select id="door_condition">
+                                <option value="excellent">Excellent (عالی)</option>
+                                <option value="good" selected>Good (خوب)</option>
+                                <option value="fair">Fair (متوسط)</option>
+                                <option value="poor">Poor (ضعیف)</option>
+                                <option value="verypoor">Very Poor (خیلی ضعیف)</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select id="door_paint">
+                                <option value="simple">Simple (ساده)</option>
+                                <option value="plastic">Plastic (پلاستیک)</option>
+                                <option value="oil" selected>Oil (روغنی)</option>
+                                <option value="acrylic">Acrylic (اکریلیک)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Window (پنجره)</strong></td>
+                        <td><input type="number" id="window_count" placeholder="count"></td>
+                        <td>
+                            <select id="window_condition">
+                                <option value="excellent">Excellent (عالی)</option>
+                                <option value="good" selected>Good (خوب)</option>
+                                <option value="fair">Fair (متوسط)</option>
+                                <option value="poor">Poor (ضعیف)</option>
+                                <option value="verypoor">Very Poor (خیلی ضعیف)</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select id="window_paint">
+                                <option value="simple">Simple (ساده)</option>
+                                <option value="plastic">Plastic (پلاستیک)</option>
+                                <option value="oil" selected>Oil (روغنی)</option>
+                                <option value="acrylic">Acrylic (اکریلیک)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Railing (نرده)</strong></td>
+                        <td><input type="number" id="railing_length" placeholder="meters"></td>
+                        <td>
+                            <select id="railing_condition">
+                                <option value="excellent">Excellent (عالی)</option>
+                                <option value="good" selected>Good (خوب)</option>
+                                <option value="fair">Fair (متوسط)</option>
+                                <option value="poor">Poor (ضعیف)</option>
+                                <option value="verypoor">Very Poor (خیلی ضعیف)</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select id="railing_paint">
+                                <option value="simple">Simple (ساده)</option>
+                                <option value="plastic">Plastic (پلاستیک)</option>
+                                <option value="oil">Oil (روغنی)</option>
+                                <option value="acrylic" selected>Acrylic (اکریلیک)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cornice (قرنیز)</strong></td>
+                        <td><input type="number" id="cornice_length" placeholder="meters"></td>
+                        <td>
+                            <select id="cornice_condition">
+                                <option value="excellent">Excellent (عالی)</option>
+                                <option value="good" selected>Good (خوب)</option>
+                                <option value="fair">Fair (متوسط)</option>
+                                <option value="poor">Poor (ضعیف)</option>
+                                <option value="verypoor">Very Poor (خیلی ضعیف)</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select id="cornice_paint">
+                                <option value="simple">Simple (ساده)</option>
+                                <option value="plastic" selected>Plastic (پلاستیک)</option>
+                                <option value="oil">Oil (روغنی)</option>
+                                <option value="acrylic">Acrylic (اکریلیک)</option>
+                            </select>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="grid grid-2">
+                <div style="background: #edf2f7; padding: 15px; border-radius: 8px;">
+                    <label>Number of Workers - تعداد نقاش</label>
+                    <input type="number" id="workers" value="1" min="1">
+                </div>
+                <div style="background: #fef5e7; padding: 15px; border-radius: 8px;">
+                    <label>Cleaning & Control (h) - نظافت (ساعت)</label>
+                    <input type="number" id="cleaning" value="4" min="0" step="0.5">
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="calculate()">🧮 Calculate - محاسبه</button>
+        </div>
+
+        <!-- Results -->
+        <div id="resultsPanel" class="card hidden">
+            <h2>📊 Results - نتیجه محاسبات</h2>
+            <div id="resultsContent"></div>
+            <button class="btn btn-success" onclick="downloadReport()">📥 Download Report - دانلود گزارش</button>
+        </div>
+    </div>
+
+    <script>
+        var results = null;
+
+        function toggleSettings() {
+            var panel = document.getElementById('settingsPanel');
+            panel.classList.toggle('hidden');
+        }
+
+        function getRate(type) {
+            return parseFloat(document.getElementById('rate_' + type).value) || 10;
+        }
+
+        function getCondition(type) {
+            return parseFloat(document.getElementById('cond_' + type).value) || 1.0;
+        }
+
+        function calculate() {
+            var sections = [
+                { name: 'Wall (دیوار)', id: 'wall', type: 'area', unitSize: 1 },
+                { name: 'Ceiling (سقف)', id: 'ceiling', type: 'area', unitSize: 1 },
+                { name: 'Door (در)', id: 'door', type: 'count', unitSize: 2 },
+                { name: 'Window (پنجره)', id: 'window', type: 'count', unitSize: 1.5 },
+                { name: 'Railing (نرده)', id: 'railing', type: 'length', unitSize: 0.5 },
+                { name: 'Cornice (قرنیز)', id: 'cornice', type: 'length', unitSize: 0.3 }
+            ];
+
+            var totalTime = 0;
+            var sectionResults = [];
+
+            for (var i = 0; i < sections.length; i++) {
+                var s = sections[i];
+                var inputVal = parseFloat(document.getElementById(s.id + '_' + s.type).value) || 0;
+                
+                if (inputVal > 0) {
+                    var area = inputVal * s.unitSize;
+                    var paintType = document.getElementById(s.id + '_paint').value;
+                    var condition = document.getElementById(s.id + '_condition').value;
+                    
+                    var rate = getRate(paintType);
+                    var multiplier = getCondition(condition);
+                    var time = (area / rate) * multiplier;
+                    
+                    totalTime += time;
+                    
+                    sectionResults.push({
+                        name: s.name,
+                        area: area.toFixed(2),
+                        paint: paintType,
+                        condition: condition,
+                        time: time.toFixed(1)
+                    });
+                }
+            }
+
+            var workers = parseInt(document.getElementById('workers').value) || 1;
+            var cleaning = parseFloat(document.getElementById('cleaning').value) || 0;
+            var workTime = totalTime / workers;
+            var finalTime = workTime + cleaning;
+
+            results = {
+                sections: sectionResults,
+                totalWorkTime: totalTime.toFixed(1),
+                timePerWorker: workTime.toFixed(1),
+                cleaningTime: cleaning,
+                finalTotalTime: finalTime.toFixed(1),
+                days: (finalTime / 8).toFixed(1),
+                workers: workers
+            };
+
+            displayResults();
+        }
+
+        function displayResults() {
+            var html = '<table><thead><tr>';
+            html += '<th>Section - بخش</th>';
+            html += '<th>Area (m²)</th>';
+            html += '<th>Paint - رنگ</th>';
+            html += '<th>Condition - وضعیت</th>';
+            html += '<th>Time (h)</th>';
+            html += '</tr></thead><tbody>';
+
+            for (var i = 0; i < results.sections.length; i++) {
+                var s = results.sections[i];
+                html += '<tr><td>' + s.name + '</td>';
+                html += '<td>' + s.area + '</td>';
+                html += '<td>' + s.paint + '</td>';
+                html += '<td>' + s.condition + '</td>';
+                html += '<td><strong>' + s.time + '</strong></td></tr>';
+            }
+            html += '</tbody></table>';
+
+            html += '<div class="result-box">';
+            html += '<h3 style="margin-bottom: 10px;">⏱️ Time Summary - خلاصه زمان</h3>';
+            html += '<p><strong>Total Work Hours - مجموع ساعت کار:</strong> ' + results.totalWorkTime + ' h</p>';
+            html += '<p><strong>Number of Workers - تعداد نقاش:</strong> ' + results.workers + ' persons</p>';
+            html += '<p><strong>Time per Worker - ساعت هر نقاش:</strong> ' + results.timePerWorker + ' h</p>';
+            html += '<p><strong>Cleaning & Control - نظافت:</strong> ' + results.cleaningTime + ' h</p>';
+            html += '<div class="result-big">✅ Final Total - جمع کل: ' + results.finalTotalTime + ' h (' + results.days + ' days)</div>';
+            html += '</div>';
+
+            document.getElementById('resultsContent').innerHTML = html;
+            document.getElementById('resultsPanel').classList.remove('hidden');
+        }
+
+        function downloadReport() {
+            if (!results) return;
+
+            var html = '<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8">';
+            html += '<title>Painting Report - گزارش نقاشی</title>';
+            html += '<style>body{font-family:Tahoma,Arial;padding:40px;line-height:1.8;}';
+            html += 'h1{color:#2c5282;text-align:center;border-bottom:3px solid #333;padding-bottom:20px;}';
+            html += 'table{width:100%;border-collapse:collapse;margin:20px 0;}';
+            html += 'th,td{padding:12px;border:1px solid #ddd;text-align:center;}';
+            html += 'th{background:#4299e1;color:white;}';
+            html += 'tr:nth-child(even){background:#f7fafc;}';
+            html += '.summary{background:#edf2f7;padding:20px;border-radius:8px;margin:20px 0;}';
+            html += '.final{background:#d4edda;padding:20px;border-radius:8px;margin:20px 0;font-size:1.2em;}';
+            html += '</style></head><body>';
+            
+            html += '<h1>Painting Project Report<br>گزارش پروژه نقاشی ساختمان</h1>';
+            html += '<p style="text-align:center;color:#666;">Date - تاریخ: ' + new Date().toLocaleDateString() + '</p>';
+            
+            html += '<h2>Work Sections - بخش‌های کاری</h2><table><tr>';
+            html += '<th>Section - بخش</th><th>Area - مساحت (m²)</th>';
+            html += '<th>Paint Type - نوع رنگ</th><th>Condition - وضعیت</th>';
+            html += '<th>Time - زمان (h)</th></tr>';
+            
+            for (var i = 0; i < results.sections.length; i++) {
+                var s = results.sections[i];
+                html += '<tr><td>' + s.name + '</td><td>' + s.area + '</td>';
+                html += '<td>' + s.paint + '</td><td>' + s.condition + '</td>';
+                html += '<td><strong>' + s.time + '</strong></td></tr>';
+            }
+            html += '</table>';
+            
+            html += '<div class="summary"><h3>⏱️ Time Summary - خلاصه زمان</h3>';
+            html += '<p><strong>Total Work Hours - مجموع ساعت کار:</strong> ' + results.totalWorkTime + ' hours - ساعت</p>';
+            html += '<p><strong>Number of Workers - تعداد نقاش:</strong> ' + results.workers + ' person(s) - نفر</p>';
+            html += '<p><strong>Work Time Per Worker - ساعت هر نقاش:</strong> ' + results.timePerWorker + ' hours - ساعت</p>';
+            html += '<p><strong>Cleaning & Final Control - نظافت و کنترل:</strong> ' + results.cleaningTime + ' hours - ساعت</p></div>';
+            
+            html += '<div class="final"><h3>✅ Final Total - جمع کل نهایی</h3>';
+            html += '<p><strong>Total Hours - مجموع ساعات:</strong> ' + results.finalTotalTime + ' hours - ساعت</p>';
+            html += '<p><strong>Working Days (8h) - روز کاری:</strong> ' + results.days + ' days - روز</p></div>';
+            
+            html += '<p style="text-align:center;color:#999;margin-top:40px;border-top:2px solid #ddd;padding-top:20px;">';
+            html += 'Generated by Painting Calculator System<br>تولید شده توسط سیستم محاسبه نقاشی</p>';
+            html += '</body></html>';
+
+            var blob = new Blob([html], { type: 'text/html' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'Painting-Report-' + new Date().getTime() + '.html';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
